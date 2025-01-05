@@ -1,8 +1,11 @@
 <script setup>
-import jobData from '@/jobs.json';
+// import jobData from '@/jobs.json';
 import { RouterLink } from 'vue-router';
 import JobListing from '@/components/JobListing.vue';
-import { defineProps, ref } from 'vue';
+import { defineProps, reactive, onMounted } from 'vue';
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
+import axios from 'axios';
+
 defineProps({
     limit: Number,
     showButton: {
@@ -11,9 +14,36 @@ defineProps({
     },
 
 })
+const jobs = reactive({
+    data: [],
+    isLoading: true,
+});
+onMounted(async () => {
+    try {
+        // Using fetch api
+        // const response = await fetch("http://localhost:5000/jobs")
+        // if (!response.ok) {
+        //     throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        // const data = await response.json(); // Parse the response JSON
+        // jobs.value = data;
 
 
-const jobs = ref(jobData)
+        // Using axios>
+        const response = await axios.get("/api/jobs/")
+        jobs.data = response.data;
+
+
+
+    } catch (error) {
+        console.error('Error Fetching job', error)
+    } finally {
+        jobs.isLoading = false;
+    }
+
+});
+
+
 
 
 </script>
@@ -24,10 +54,13 @@ const jobs = ref(jobData)
                 Browse Jobs
             </h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            <JobListing v-for="job in jobs.slice(0, limit || jobs.length)" :key="job.id" :job="job" />
-
+        <!-- Show Loading  -->
+        <div v-if="jobs.isLoading" class="text-center text-gray-500 py-6">
+            <PulseLoader />
+        </div>
+        <!-- Show Jobs after loading  -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <JobListing v-for="job in jobs.data.slice(0, limit || jobs.data.length)" :key="job.id" :job="job" />
         </div>
     </section>
     <section class="m-auto max-w-lg my-10 px-6" v-if="showButton">
