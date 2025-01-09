@@ -33,13 +33,11 @@ onMounted(async () => {
         const response = await axios.get("/api/jobs/")
         jobs.data = response.data;
 
-
+      jobs.isLoading = false;
 
     } catch (error) {
         console.error('Error Fetching job', error)
-    } finally {
-        jobs.isLoading = false;
-    }
+    } 
 
 });
 
